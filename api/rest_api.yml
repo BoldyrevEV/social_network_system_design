@@ -1,0 +1,41 @@
+apiVersion: v1
+
+# Аутентификация и авторизация
+register(params...) # Регистрация нового пользователя
+getProfile(params...) # Получить информацию о своем профиле
+updateProfile(params...) # Обновить свой профиль
+deleteProfile(params...) # Удалить аккаунт
+changePassword(params...) # Сменить пароль
+forgotPassword(params...) # Запрос на сброс пароля
+verifyEmail(params...) # Подтверждение email
+login(params...) # Вход
+logout(params...) # Выход
+
+# Работа с постом
+createPost(params...) # Создание поста
+deletePost(params...) # Удаление поста
+editPost(params...) # Редактирование поста
+getPosts(params...) # Получить список постов
+getPostsById(params...) # Получить конкретный пост
+
+# Лайки
+addLike(params...) # Поставить лайк посту
+deleteLike(params...) # Убрать лайк с поста
+getLikes(params...) # Получить список лайкнувших
+
+# Комментарии
+addComment(params...) # Добавление комментария к посту
+deleteComment(params...) # Удаление комментария к посту
+editComment(params...) # Редактирование комментария к посту
+getComments(params...) # Получить список комментариев к посту
+
+# Подписка
+subscribe(params...) # Подписаться на пользователя
+unsubscribe(params...) # Удалить подписку на пользователя
+
+# Поиск
+getTravelDestinations(params...) # Поиск популярных мест для путешествий
+getPostsTravelDestinations(params...) # Просмотр постов с популярных мест для путешествий
+
+# Просмотр ленты
+getUsersNews(params...) # Получение ленты пользователей
