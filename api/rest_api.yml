@@ -1,41 +1,1020 @@
-apiVersion: v1
+openapi: 3.0.0
+info:
+  title: Travel Blog API
+  version: 1.0.0
+  description: API для блога путешественников с постами, лайками, комментариями и подписками
+  contact:
+    name: API Support
+    email: support@travelblog.com
 
-# Аутентификация и авторизация
-register(params...) # Регистрация нового пользователя
-getProfile(params...) # Получить информацию о своем профиле
-updateProfile(params...) # Обновить свой профиль
-deleteProfile(params...) # Удалить аккаунт
-changePassword(params...) # Сменить пароль
-forgotPassword(params...) # Запрос на сброс пароля
-verifyEmail(params...) # Подтверждение email
-login(params...) # Вход
-logout(params...) # Выход
+servers:
+  - url: https://api.travelblog.com/v1
+    description: Production server
+  - url: https://sandbox-api.travelblog.com/v1
+    description: Sandbox server
 
-# Работа с постом
-createPost(params...) # Создание поста
-deletePost(params...) # Удаление поста
-editPost(params...) # Редактирование поста
-getPosts(params...) # Получить список постов
-getPostsById(params...) # Получить конкретный пост
+tags:
+  - name: Authentication
+    description: Регистрация, вход, выход и управление паролями
+  - name: Profile
+    description: Управление профилем пользователя
+  - name: Posts
+    description: Создание, редактирование, удаление и получение постов
+  - name: Likes
+    description: Управление лайками на постах
+  - name: Comments
+    description: Управление комментариями к постам
+  - name: Subscriptions
+    description: Подписки на пользователей
+  - name: Search
+    description: Поиск мест и постов по направлениям
+  - name: Feed
+    description: Лента новостей пользователя
 
-# Лайки
-addLike(params...) # Поставить лайк посту
-deleteLike(params...) # Убрать лайк с поста
-getLikes(params...) # Получить список лайкнувших
+paths:
+  # ==================== AUTHENTICATION ====================
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Регистрация нового пользователя
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - username
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "securePass123"
+                username:
+                  type: string
+                  example: "traveler_john"
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-# Комментарии
-addComment(params...) # Добавление комментария к посту
-deleteComment(params...) # Удаление комментария к посту
-editComment(params...) # Редактирование комментария к посту
-getComments(params...) # Получить список комментариев к посту
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Вход в систему
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "securePass123"
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-# Подписка
-subscribe(params...) # Подписаться на пользователя
-unsubscribe(params...) # Удалить подписку на пользователя
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Выход из системы
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Успешный выход
 
-# Поиск
-getTravelDestinations(params...) # Поиск популярных мест для путешествий
-getPostsTravelDestinations(params...) # Просмотр постов с популярных мест для путешествий
+  /auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Смена пароля
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - old_password
+                - new_password
+              properties:
+                old_password:
+                  type: string
+                  example: "oldPass123"
+                new_password:
+                  type: string
+                  example: "newPass456"
+      responses:
+        '200':
+          description: Пароль успешно изменен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password changed successfully"
+        '400':
+          description: Неверный старый пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-# Просмотр ленты
-getUsersNews(params...) # Получение ленты пользователей
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Запрос на сброс пароля
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: Инструкция по сбросу отправлена на email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reset link sent to email"
+
+  /auth/verify-email:
+    post:
+      tags:
+        - Authentication
+      summary: Подтверждение email адреса
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIs..."
+      responses:
+        '200':
+          description: Email успешно подтвержден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Email verified successfully"
+
+  # ==================== PROFILE ====================
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Получить информацию о своем профиле
+      operationId: getProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Profile
+      summary: Обновить информацию профиля
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200':
+          description: Профиль успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          description: Ошибка валидации
+
+    delete:
+      tags:
+        - Profile
+      summary: Удалить аккаунт
+      operationId: deleteProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Аккаунт успешно удален
+        '401':
+          description: Не авторизован
+
+  # ==================== POSTS ====================
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: Получить список постов
+      operationId: getPosts
+      parameters:
+        - name: limit
+          in: query
+          description: Количество постов на страницу
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: author_id
+          in: query
+          description: Фильтр по автору
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список постов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+
+    post:
+      tags:
+        - Posts
+      summary: Создать новый пост
+      operationId: createPost
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreate'
+      responses:
+        '201':
+          description: Пост успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Ошибка валидации
+
+  /posts/{postId}:
+    get:
+      tags:
+        - Posts
+      summary: Получить конкретный пост по ID
+      operationId: getPostsById
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: ID поста
+          schema:
+            type: integer
+            example: 123
+      responses:
+        '200':
+          description: Данные поста
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Пост не найден
+
+    put:
+      tags:
+        - Posts
+      summary: Редактировать пост
+      operationId: editPost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdate'
+      responses:
+        '200':
+          description: Пост успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '403':
+          description: Нет прав на редактирование
+        '404':
+          description: Пост не найден
+
+    delete:
+      tags:
+        - Posts
+      summary: Удалить пост
+      operationId: deletePost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Пост успешно удален
+        '403':
+          description: Нет прав на удаление
+        '404':
+          description: Пост не найден
+
+  # ==================== LIKES ====================
+  /posts/{postId}/likes:
+    get:
+      tags:
+        - Likes
+      summary: Получить список пользователей, лайкнувших пост
+      operationId: getLikes
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserShort'
+
+    post:
+      tags:
+        - Likes
+      summary: Поставить лайк посту
+      operationId: addLike
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Лайк успешно добавлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Like added"
+        '409':
+          description: Лайк уже поставлен
+
+    delete:
+      tags:
+        - Likes
+      summary: Убрать лайк с поста
+      operationId: deleteLike
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Лайк успешно удален
+        '404':
+          description: Лайк не найден
+
+  # ==================== COMMENTS ====================
+  /posts/{postId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: Получить список комментариев к посту
+      operationId: getComments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+
+    post:
+      tags:
+        - Comments
+      summary: Добавить комментарий к посту
+      operationId: addComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+                  example: "Great place! I've been there last summer."
+      responses:
+        '201':
+          description: Комментарий успешно добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Ошибка валидации
+
+  /comments/{commentId}:
+    put:
+      tags:
+        - Comments
+      summary: Редактировать комментарий
+      operationId: editComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  example: "Updated comment text"
+      responses:
+        '200':
+          description: Комментарий успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '403':
+          description: Нет прав на редактирование
+        '404':
+          description: Комментарий не найден
+
+    delete:
+      tags:
+        - Comments
+      summary: Удалить комментарий
+      operationId: deleteComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Комментарий успешно удален
+        '403':
+          description: Нет прав на удаление
+        '404':
+          description: Комментарий не найден
+
+  # ==================== SUBSCRIPTIONS ====================
+  /subscribe/{userId}:
+    post:
+      tags:
+        - Subscriptions
+      summary: Подписаться на пользователя
+      operationId: subscribe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID пользователя, на которого подписываемся
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Подписка успешно оформлена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Subscribed successfully"
+        '400':
+          description: Нельзя подписаться на самого себя
+        '409':
+          description: Уже подписан
+
+    delete:
+      tags:
+        - Subscriptions
+      summary: Отписаться от пользователя
+      operationId: unsubscribe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Подписка успешно удалена
+        '404':
+          description: Подписка не найдена
+
+  # ==================== SEARCH ====================
+  /search/destinations:
+    get:
+      tags:
+        - Search
+      summary: Поиск популярных мест для путешествий
+      operationId: getTravelDestinations
+      parameters:
+        - name: query
+          in: query
+          description: Поисковый запрос (название места, страны)
+          schema:
+            type: string
+            example: "Paris"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+        - name: sort_by
+          in: query
+          description: Сортировка результатов
+          schema:
+            type: string
+            enum: [popularity, name, posts_count]
+            default: popularity
+      responses:
+        '200':
+          description: Список найденных мест
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  destinations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Destination'
+
+  /search/posts-by-destination:
+    get:
+      tags:
+        - Search
+      summary: Найти посты по популярному месту
+      operationId: getPostsTravelDestinations
+      parameters:
+        - name: destination
+          in: query
+          required: true
+          description: Название места
+          schema:
+            type: string
+            example: "Eiffel Tower"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Посты, связанные с указанным местом
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+
+  # ==================== FEED ====================
+  /news:
+    get:
+      tags:
+        - Feed
+      summary: Получить ленту постов от подписок
+      operationId: getUsersNews
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Количество постов в ленте
+          schema:
+            type: integer
+            default: 30
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: sort_by
+          in: query
+          description: Сортировка ленты
+          schema:
+            type: string
+            enum: [recent, popular]
+            default: recent
+      responses:
+        '200':
+          description: Лента постов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  feed:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT токен, полученный при авторизации
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT токен для доступа к API
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        token_type:
+          type: string
+          example: "Bearer"
+        expires_in:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/UserShort'
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        username:
+          type: string
+          example: "john_doe"
+        avatar_url:
+          type: string
+          format: uri
+          example: "https://storage.travelblog.com/avatars/1.jpg"
+        bio:
+          type: string
+          example: "Passionate traveler from NYC"
+        created_at:
+          type: string
+          format: date-time
+        followers_count:
+          type: integer
+          example: 150
+        following_count:
+          type: integer
+          example: 80
+
+    ProfileUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        avatar_url:
+          type: string
+          format: uri
+        bio:
+          type: string
+          maxLength: 500
+
+    UserShort:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        avatar_url:
+          type: string
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        title:
+          type: string
+          example: "My Amazing Trip to Bali"
+        content:
+          type: string
+          example: "Bali is absolutely stunning..."
+        author:
+          $ref: '#/components/schemas/UserShort'
+        destination:
+          type: string
+          example: "Bali, Indonesia"
+        likes_count:
+          type: integer
+          example: 45
+        comments_count:
+          type: integer
+          example: 12
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PostCreate:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: "Exploring Tokyo"
+        content:
+          type: string
+          minLength: 10
+          maxLength: 10000
+          example: "Tokyo is a fascinating city..."
+        destination:
+          type: string
+          maxLength: 100
+          example: "Tokyo, Japan"
+
+    PostUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        content:
+          type: string
+          minLength: 10
+          maxLength: 10000
+        destination:
+          type: string
+          maxLength: 100
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 456
+        post_id:
+          type: integer
+          example: 123
+        author:
+          $ref: '#/components/schemas/UserShort'
+        content:
+          type: string
+          example: "Amazing photos!"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Destination:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Eiffel Tower"
+        country:
+          type: string
+          example: "France"
+        city:
+          type: string
+          example: "Paris"
+        posts_count:
+          type: integer
+          example: 342
+        popularity_score:
+          type: number
+          format: float
+          example: 9.5
+        image_url:
+          type: string
+          format: uri
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation error"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              error:
+                type: string
