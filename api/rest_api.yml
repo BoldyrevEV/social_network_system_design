@@ -26,10 +26,12 @@ tags:
     description: Управление комментариями к постам
   - name: Subscriptions
     description: Подписки на пользователей
-  - name: Search
+  - name: Destinations
     description: Поиск мест и постов по направлениям
   - name: Feed
     description: Лента новостей пользователя
+  - name: Media
+    description: Загрузка и управление медиафайлами
 
 paths:
   # ==================== AUTHENTICATION ====================
@@ -74,6 +76,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/login:
     post:
@@ -110,6 +118,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/logout:
     post:
@@ -122,6 +136,12 @@ paths:
       responses:
         '204':
           description: Успешный выход
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/change-password:
     post:
@@ -164,6 +184,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/forgot-password:
     post:
@@ -195,6 +221,12 @@ paths:
                   message:
                     type: string
                     example: "Reset link sent to email"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/verify-email:
     post:
@@ -225,6 +257,12 @@ paths:
                   message:
                     type: string
                     example: "Email verified successfully"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ==================== PROFILE ====================
   /profile:
@@ -244,6 +282,12 @@ paths:
                 $ref: '#/components/schemas/Profile'
         '401':
           description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
           content:
             application/json:
               schema:
@@ -271,6 +315,16 @@ paths:
                 $ref: '#/components/schemas/Profile'
         '400':
           description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       tags:
@@ -284,6 +338,16 @@ paths:
           description: Аккаунт успешно удален
         '401':
           description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ==================== POSTS ====================
   /posts:
@@ -327,6 +391,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     post:
       tags:
@@ -350,6 +420,16 @@ paths:
                 $ref: '#/components/schemas/Post'
         '400':
           description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /posts/{postId}:
     get:
@@ -374,6 +454,16 @@ paths:
                 $ref: '#/components/schemas/Post'
         '404':
           description: Пост не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     put:
       tags:
@@ -403,8 +493,22 @@ paths:
                 $ref: '#/components/schemas/Post'
         '403':
           description: Нет прав на редактирование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Пост не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       tags:
@@ -424,15 +528,29 @@ paths:
           description: Пост успешно удален
         '403':
           description: Нет прав на удаление
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Пост не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ==================== LIKES ====================
   /posts/{postId}/likes:
     get:
       tags:
         - Likes
-      summary: Получить список пользователей, лайкнувших пост
+      summary: Получить список пользователей, лайкнувших пост (с пагинацией)
       operationId: getLikes
       parameters:
         - name: postId
@@ -440,6 +558,21 @@ paths:
           required: true
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Количество записей на страницу
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
       responses:
         '200':
           description: Список пользователей
@@ -448,12 +581,19 @@ paths:
               schema:
                 type: object
                 properties:
-                  count:
+                  total:
                     type: integer
+                    description: Общее количество лайков
                   users:
                     type: array
                     items:
                       $ref: '#/components/schemas/UserShort'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     post:
       tags:
@@ -481,6 +621,16 @@ paths:
                     example: "Like added"
         '409':
           description: Лайк уже поставлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       tags:
@@ -500,6 +650,16 @@ paths:
           description: Лайк успешно удален
         '404':
           description: Лайк не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ==================== COMMENTS ====================
   /posts/{postId}/comments:
@@ -519,11 +679,14 @@ paths:
           schema:
             type: integer
             default: 20
+            minimum: 1
+            maximum: 100
         - name: offset
           in: query
           schema:
             type: integer
             default: 0
+            minimum: 0
       responses:
         '200':
           description: Список комментариев
@@ -538,6 +701,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Comment'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     post:
       tags:
@@ -575,6 +744,16 @@ paths:
                 $ref: '#/components/schemas/Comment'
         '400':
           description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /comments/{commentId}:
     put:
@@ -611,8 +790,22 @@ paths:
                 $ref: '#/components/schemas/Comment'
         '403':
           description: Нет прав на редактирование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Комментарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       tags:
@@ -632,11 +825,25 @@ paths:
           description: Комментарий успешно удален
         '403':
           description: Нет прав на удаление
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Комментарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ==================== SUBSCRIPTIONS ====================
-  /subscribe/{userId}:
+  /users/{userId}/subscriptions:
     post:
       tags:
         - Subscriptions
@@ -664,8 +871,22 @@ paths:
                     example: "Subscribed successfully"
         '400':
           description: Нельзя подписаться на самого себя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: Уже подписан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       tags:
@@ -685,12 +906,68 @@ paths:
           description: Подписка успешно удалена
         '404':
           description: Подписка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-  # ==================== SEARCH ====================
-  /search/destinations:
+  # Дополнительный эндпоинт для получения списка подписок пользователя
+  /users/{userId}/subscriptions/list:
     get:
       tags:
-        - Search
+        - Subscriptions
+      summary: Получить список подписок пользователя
+      operationId: getUserSubscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Список пользователей, на которых подписан текущий пользователь
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserShort'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ==================== DESTINATIONS ====================
+  /destinations:
+    get:
+      tags:
+        - Destinations
       summary: Поиск популярных мест для путешествий
       operationId: getTravelDestinations
       parameters:
@@ -705,7 +982,13 @@ paths:
           schema:
             type: integer
             default: 10
+            minimum: 1
             maximum: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
         - name: sort_by
           in: query
           description: Сортировка результатов
@@ -727,26 +1010,34 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Destination'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-  /search/posts-by-destination:
+  /destinations/{destinationName}/posts:
     get:
       tags:
-        - Search
+        - Destinations
       summary: Найти посты по популярному месту
-      operationId: getPostsTravelDestinations
+      operationId: getPostsByDestination
       parameters:
-        - name: destination
-          in: query
+        - name: destinationName
+          in: path
           required: true
           description: Название места
           schema:
             type: string
-            example: "Eiffel Tower"
+            example: "Eiffel%20Tower"
         - name: limit
           in: query
           schema:
             type: integer
             default: 20
+            minimum: 1
+            maximum: 100
         - name: offset
           in: query
           schema:
@@ -766,9 +1057,15 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ==================== FEED ====================
-  /news:
+  /feed:
     get:
       tags:
         - Feed
@@ -783,12 +1080,14 @@ paths:
           schema:
             type: integer
             default: 30
+            minimum: 1
             maximum: 100
         - name: offset
           in: query
           schema:
             type: integer
             default: 0
+            minimum: 0
         - name: sort_by
           in: query
           description: Сортировка ленты
@@ -810,6 +1109,107 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ==================== MEDIA ====================
+  /media/upload:
+    post:
+      tags:
+        - Media
+      summary: Загрузить медиафайл (изображение, видео)
+      operationId: uploadMedia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл изображения или видео
+                type:
+                  type: string
+                  enum: [avatar, post_image, post_video]
+                  description: Тип загружаемого медиа
+                  default: post_image
+      responses:
+        '201':
+          description: Файл успешно загружен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  media_id:
+                    type: string
+                    example: "media_123abc"
+                  url:
+                    type: string
+                    format: uri
+                    example: "https://storage.travelblog.com/media/123abc.jpg"
+                  thumbnail_url:
+                    type: string
+                    format: uri
+                    description: URL миниатюры (для изображений)
+        '400':
+          description: Неверный формат файла или превышен размер
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /media/{mediaId}:
+    delete:
+      tags:
+        - Media
+      summary: Удалить медиафайл
+      operationId: deleteMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Файл успешно удален
+        '403':
+          description: Нет прав на удаление
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Файл не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   securitySchemes:
@@ -907,6 +1307,11 @@ components:
         destination:
           type: string
           example: "Bali, Indonesia"
+        media_ids:
+          type: array
+          items:
+            type: string
+          description: ID загруженных медиафайлов
         likes_count:
           type: integer
           example: 45
@@ -940,6 +1345,11 @@ components:
           type: string
           maxLength: 100
           example: "Tokyo, Japan"
+        media_ids:
+          type: array
+          items:
+            type: string
+          description: ID ранее загруженных медиафайлов
 
     PostUpdate:
       type: object
@@ -955,6 +1365,10 @@ components:
         destination:
           type: string
           maxLength: 100
+        media_ids:
+          type: array
+          items:
+            type: string
 
     Comment:
       type: object
@@ -1005,10 +1419,10 @@ components:
       properties:
         code:
           type: integer
-          example: 400
+          example: 500
         message:
           type: string
-          example: "Validation error"
+          example: "Internal server error"
         details:
           type: array
           items:
