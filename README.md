@@ -50,7 +50,7 @@ https://platform-balun.ru/pl/teach/control/stream/index
     - RPS read (2 раза в сутки) = 10 000 000 \* 2 / 86 400 = 232
     - Trafic img write (1 раз в месяц) = 4 \* 750КБ = 3000КБ/с = 1 МБ/с
     - Trafic img read (2 раза в сутки) = 232 \* 750КБ = 174000КБ/с = 170 МБ/с
-    - Trafic meta write (1 раз в месяц) = 4 \* 0,6КБ = 2.4К Б/с
+    - Trafic meta write (1 раз в месяц) = 4 \* 0,6КБ = 2.4 КБ/с
     - Trafic meta read (2 раза в сутки) = 232 \* 0,6КБ = 139.2 КБ/с
 - Реакции
     - RPS write (5 раза в сутки) = 10 000 000 \* 5 / 86 400 = 578
@@ -62,3 +62,38 @@ https://platform-balun.ru/pl/teach/control/stream/index
     - RPS read (3 раза в сутки) = 10 000 000 \* 3 / 86 400 = 348
     - Trafic write (5 раза в сутки) = 578 \* 300 байт = 174КБ/с
     - Trafic read (3 раза в сутки) = 348 \* 300 байт = 405КБ/с 
+
+## Оценка дисков в расчете на год
+IOPS:
+- Посты: 4 + 232 = 236 IOPS
+- Реакции: 578 IOPS
+- Комментарии: 578 + 348 = 926 IOPS
+
+Трафик МБ/с (read+write)
+- Посты (картинки): 1 МБ/с + 170 МБ/с = 171 МБ/с
+- Посты (мета): 2,4 КБ/с + 139,2 КБ/с ≈ 0,14 МБ/с
+- Реакции: 5 КБ/с ≈ 0,005 МБ/с
+- Комментарии: 174 + 405 ≈ 0,57 МБ/с
+
+HDD: 32 ТБ, 100 IOPS, 100 МБ/с
+
+Подсистема Посты img+meta (HDD):
+- Capasity = 172 МБ/с * 100000 * 400 = 6880 TБ 
+- Disks_for_capacity = capacity / disk_capacity = 6880 / 32 = 215
+- Disks_for_throughput = traffic_per_second / disk_throughput = 172 / 100 = 2
+- Disks_for_iops = iops / disk_iops = 236 / 100 = 3
+Итого: 215 дисков
+
+Подсистема Реакции (HDD):
+- Capasity = 0.005 МБ/с * 100000 * 400 = 0,2 TБ
+- Disks_for_capacity = capacity / disk_capacity = 0,2 / 32 = 1
+- Disks_for_throughput = traffic_per_second / disk_throughput = 0.005 / 100 = 1
+- Disks_for_iops = iops / disk_iops = 578 / 100 = 6
+Итого: 6 дисков
+
+Подсистема Комментарии (HDD):
+- Capasity = 0,57 МБ/с * 100000 * 400 = 22,8 TБ
+- Disks_for_capacity = capacity / disk_capacity = 22,8 / 32 = 1
+- Disks_for_throughput = traffic_per_second / disk_throughput = 0.57 / 100 = 1
+- Disks_for_iops = iops / disk_iops = 926 / 100 = 10
+Итого: 10 дисков
